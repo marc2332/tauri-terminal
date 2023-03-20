@@ -17,8 +17,7 @@ struct AppState {
 
 #[tauri::command]
 async fn async_write_to_pty(data: &str, state: State<'_, AppState>) -> Result<(), ()> {
-    write!(state.writer.lock().await, "{}", data).unwrap();
-    Ok(())
+    write!(state.writer.lock().await, "{}", data).map_err(|_| ())
 }
 
 #[tauri::command]
@@ -33,9 +32,7 @@ async fn async_resize_pty(rows: u16, cols: u16, state: State<'_, AppState>) -> R
             cols,
             ..Default::default()
         })
-        .unwrap();
-
-    Ok(())
+        .map_err(|_| ())
 }
 
 fn main() {
