@@ -1,0 +1,21 @@
+[package]
+name = "tauri-terminal"
+version = "0.0.0"
+description = "A Tauri App"
+authors = ["you"]
+license = ""
+repository = ""
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "1.2", features = [] }
+
+[dependencies]
+tauri = { version = "1.2", features = ["shell-open"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+portable-pty = "0.8.1"
+tokio = { version = "1.26.0", features = ["time"] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

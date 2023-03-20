@@ -1,0 +1,8 @@
+body {
+  margin: 0;
+  background: rgb(47, 47, 47);
+}
+
+#terminal {
+ height: 100vh;
+}

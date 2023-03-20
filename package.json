@@ -1,0 +1,22 @@
+{
+  "name": "tauri-terminal",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1.2.0",
+    "xterm": "^5.1.0",
+    "xterm-addon-fit": "^0.7.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.2.2",
+    "typescript": "^4.8.2",
+    "vite": "^4.0.0"
+  }
+}
