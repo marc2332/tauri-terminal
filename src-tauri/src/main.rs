@@ -48,7 +48,7 @@ fn main() {
         .unwrap();
 
     #[cfg(target_os = "windows")]
-    let cmd = CommandBuilder::new("powershell");
+    let cmd = CommandBuilder::new("powershell.exe");
     #[cfg(not(target_os = "windows"))]
     let cmd = CommandBuilder::new("bash");
 
