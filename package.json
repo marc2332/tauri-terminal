@@ -10,13 +10,13 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.2.0",
-    "xterm": "^5.1.0",
+    "@tauri-apps/api": "^1.4.0",
+    "xterm": "^5.2.1",
     "xterm-addon-fit": "^0.7.0"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.2.2",
-    "typescript": "^4.8.2",
-    "vite": "^4.0.0"
+    "@tauri-apps/cli": "^1.4.0",
+    "typescript": "^4.9.5",
+    "vite": "^4.4.3"
   }
 }
