@@ -23,11 +23,6 @@ async function fitTerminal() {
     rows: term.rows,
     cols: term.cols,
   });
-  // Create a shell if it doesn't exist
-  invoke("async_create_shell").catch((error) => {
-    // on linux it seem to to "Operation not permitted (os error 1)" but it still works because echo $SHELL give /bin/bash
-    console.error("Error creating shell:", error);
-  });
 }
 
 // Write data from pty into the terminal
@@ -41,7 +36,14 @@ function writeToPty(data: string) {
     data,
   });
 }
+function InitShell() {
+  invoke("async_create_shell").catch((error) => {
+    // on linux it seem to to "Operation not permitted (os error 1)" but it still works because echo $SHELL give /bin/bash
+    console.error("Error creating shell:", error);
+  });
+}
 
+InitShell();
 term.onData(writeToPty);
 addEventListener("resize", fitTerminal);
 listen("data", writeToTerminal);
