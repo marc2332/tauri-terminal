@@ -11,13 +11,13 @@ const term = new Terminal({
   fontFamily: "Jetbrains Mono",
   theme: {
     background: "rgb(47, 47, 47)",
-  }
+  },
 });
 term.loadAddon(fitAddon);
 term.open(terminalElement);
 
 // Make the terminal fit all the window size
-function fitTerminal(){
+async function fitTerminal() {
   fitAddon.fit();
   void invoke<string>("async_resize_pty", {
     rows: term.rows,
@@ -27,18 +27,24 @@ function fitTerminal(){
 
 // Write data from pty into the terminal
 function writeToTerminal(ev: Event<string>) {
-  term.write(ev.payload)
+  term.write(ev.payload);
 }
 
 // Write data from the terminal to the pty
-function writeToPty(data: string){
+function writeToPty(data: string) {
   void invoke("async_write_to_pty", {
     data,
   });
 }
+function initShell() {
+  invoke("async_create_shell").catch((error) => {
+    // on linux it seem to to "Operation not permitted (os error 1)" but it still works because echo $SHELL give /bin/bash
+    console.error("Error creating shell:", error);
+  });
+}
 
-
+initShell();
 term.onData(writeToPty);
 addEventListener("resize", fitTerminal);
-listen("data", writeToTerminal)
+listen("data", writeToTerminal);
 fitTerminal();
