@@ -36,14 +36,14 @@ function writeToPty(data: string) {
     data,
   });
 }
-function InitShell() {
+function initShell() {
   invoke("async_create_shell").catch((error) => {
     // on linux it seem to to "Operation not permitted (os error 1)" but it still works because echo $SHELL give /bin/bash
     console.error("Error creating shell:", error);
   });
 }
 
-InitShell();
+initShell();
 term.onData(writeToPty);
 addEventListener("resize", fitTerminal);
 listen("data", writeToTerminal);
