@@ -60,7 +60,7 @@ async fn async_read_from_pty(state: State<'_, AppState>) -> Result<Option<String
         // Read all available text
         let data = reader.fill_buf().map_err(|_| ())?;
 
-        // Send to to the webview if necessary
+        // Send te data to the webview if necessary
         if data.len() > 0 {
             std::str::from_utf8(data)
                 .map(|v| Some(v.to_string()))
@@ -71,9 +71,7 @@ async fn async_read_from_pty(state: State<'_, AppState>) -> Result<Option<String
     };
 
     if let Some(data) = &data {
-        if data.len() > 0 {
-            reader.consume(data.len());
-        }
+        reader.consume(data.len());
     }
 
     Ok(data)

@@ -26,9 +26,9 @@ async function fitTerminal() {
 
 // Write data from pty into the terminal
 function writeToTerminal(data: string) {
-  return new Promise<void>(r => {
+  return new Promise<void>((r) => {
     term.write(data, () => r());
-  })
+  });
 }
 
 // Write data from the terminal to the pty
@@ -49,11 +49,10 @@ term.onData(writeToPty);
 addEventListener("resize", fitTerminal);
 fitTerminal();
 
-
 async function readFromPty() {
   const data = await invoke<string>("async_read_from_pty");
 
-  if(data){
+  if (data) {
     await writeToTerminal(data);
   }
 
