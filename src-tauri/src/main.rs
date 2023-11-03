@@ -3,11 +3,10 @@
 
 use portable_pty::{native_pty_system, CommandBuilder, PtyPair, PtySize};
 use std::{
-    io::{BufRead, BufReader, Write},
+    io::{BufRead, BufReader, Read, Write},
     process::exit,
-    sync::{Arc, Mutex},
-    thread::{self, sleep},
-    time::Duration,
+    sync::Arc,
+    thread::{self},
 };
 
 use tauri::{async_runtime::Mutex as AsyncMutex, State};
@@ -15,6 +14,7 @@ use tauri::{async_runtime::Mutex as AsyncMutex, State};
 struct AppState {
     pty_pair: Arc<AsyncMutex<PtyPair>>,
     writer: Arc<AsyncMutex<Box<dyn Write + Send>>>,
+    reader: Arc<AsyncMutex<BufReader<Box<dyn Read + Send>>>>,
 }
 #[tauri::command]
 // create a shell and add to it the $TERM env variable so we can use clear and other commands
@@ -54,6 +54,32 @@ async fn async_write_to_pty(data: &str, state: State<'_, AppState>) -> Result<()
 }
 
 #[tauri::command]
+async fn async_read_from_pty(state: State<'_, AppState>) -> Result<Option<String>, ()> {
+    let mut reader = state.reader.lock().await;
+    let data = {
+        // Read all available text
+        let data = reader.fill_buf().map_err(|_| ())?;
+
+        // Send to to the webview if necessary
+        if data.len() > 0 {
+            std::str::from_utf8(data)
+                .map(|v| Some(v.to_string()))
+                .map_err(|_| ())?
+        } else {
+            None
+        }
+    };
+
+    if let Some(data) = &data {
+        if data.len() > 0 {
+            reader.consume(data.len());
+        }
+    }
+
+    Ok(data)
+}
+
+#[tauri::command]
 async fn async_resize_pty(rows: u16, cols: u16, state: State<'_, AppState>) -> Result<(), ()> {
     state
         .pty_pair
@@ -83,35 +109,17 @@ fn main() {
     let reader = pty_pair.master.try_clone_reader().unwrap();
     let writer = pty_pair.master.take_writer().unwrap();
 
-    let reader = Arc::new(Mutex::new(Some(BufReader::new(reader))));
-
     tauri::Builder::default()
-        .on_page_load(move |window, _| {
-            let window = window.clone();
-            let reader = reader.clone();
-
-            thread::spawn(move || {
-                let reader = reader.lock().unwrap().take();
-                if let Some(mut reader) = reader {
-                    loop {
-                        sleep(Duration::from_millis(1));
-                        let data = reader.fill_buf().unwrap().to_vec();
-                        reader.consume(data.len());
-                        if data.len() > 0 {
-                            window.emit("data", data).unwrap();
-                        }
-                    }
-                }
-            });
-        })
         .manage(AppState {
             pty_pair: Arc::new(AsyncMutex::new(pty_pair)),
             writer: Arc::new(AsyncMutex::new(writer)),
+            reader: Arc::new(AsyncMutex::new(BufReader::new(reader))),
         })
         .invoke_handler(tauri::generate_handler![
             async_write_to_pty,
             async_resize_pty,
-            async_create_shell
+            async_create_shell,
+            async_read_from_pty
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
